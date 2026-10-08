@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <PlatformToolset>v143</PlatformToolset>
+
+    <!-- Pick your standard -->
+    <LanguageStandard>stdcpp20</LanguageStandard>
+
+    <!-- Sensible defaults -->
+    <TreatWarningAsError>true</TreatWarningAsError>
+    <WarningLevel>Level4</WarningLevel>
+
+    <!-- Usually good for DLL builds -->
+    <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    <ConformanceMode>true</ConformanceMode>
+  </PropertyGroup>
+</Project>
