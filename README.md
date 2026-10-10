@@ -8,6 +8,14 @@ Loaded by ProjectWise Explorer as a custom module. Not affiliated with or endors
 
 A **custom theme editor is planned for a future release**. The current version provides preset themes only.
 
+## Dark theme previews
+
+Actual Explorer captures with private datasource, project, document and account details covered by opaque redactions. These show the presets, not a custom theme editor. See the [screenshot gallery](assets/screenshots/README.md) for sharing notes and the tested environment.
+
+| One Half Dark | Solarized Dark | Campbell Powershell |
+| --- | --- | --- |
+| [![One Half Dark](assets/screenshots/one-half-dark.png)](assets/screenshots/one-half-dark.png) | [![Solarized Dark](assets/screenshots/solarized-dark.png)](assets/screenshots/solarized-dark.png) | [![Campbell Powershell](assets/screenshots/campbell-powershell.png)](assets/screenshots/campbell-powershell.png) |
+
 ## Building
 
 Requirements:
