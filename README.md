@@ -112,6 +112,8 @@ The module changes colours only, and only inside ProjectWise Explorer's own proc
 
 ## Third-party software
 
+The preset palette data is adapted from [Microsoft Windows Terminal](https://github.com/microsoft/terminal/blob/1282d56a33bb15206fcb3a09d3bea0a33036f2cd/src/cascadia/TerminalSettingsModel/defaults.json) under the MIT licence. See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) for its source revision, Microsoft copyright and full licence, together with the MinHook notices. This file is included in new installer builds.
+
 This module includes [MinHook](https://github.com/TsudaKageyu/minhook) v1.3.4, built from source as the `external/minhook` submodule, under the BSD 2-Clause licence. See [external/minhook/LICENSE.txt](external/minhook/LICENSE.txt) for the complete notice, including the Hacker Disassembler Engine notices.
 
 ## Issues and contributions

@@ -62,6 +62,9 @@
           <Component Id="MinHookLicence" Guid="301C25EB-F4B7-407D-A7C9-9D37735378BF">
             <File Source="../external/minhook/LICENSE.txt" Name="MinHook-LICENSE.txt" KeyPath="yes" />
           </Component>
+          <Component Id="ThirdPartyNotices" Guid="5BFB6F25-6865-4F85-B51B-DA0E0A0A2287">
+            <File Source="../THIRD-PARTY-NOTICES.txt" KeyPath="yes" />
+          </Component>
           <Component Id="Readme" Guid="E59BE89A-1D4B-4B7A-B70E-8207AF81100C">
             <File Source="../README.md" KeyPath="yes" />
           </Component>
@@ -73,6 +76,7 @@
       <ComponentRef Id="Licence" />
       <ComponentRef Id="MinHookLicence" />
       <ComponentRef Id="Readme" />
+      <ComponentRef Id="ThirdPartyNotices" />
     </Feature>
   </Package>
 </Wix>

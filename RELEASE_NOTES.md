@@ -14,3 +14,7 @@ The presets are inspired by Windows Terminal colour schemes. A custom theme edit
 Close ProjectWise Explorer, install the MSI as an administrator, then reopen Explorer. The Microsoft Visual C++ v14 Redistributable (x86), version 14.44.35207 or newer, is required. The installer is unsigned.
 
 WPF and Chromium panes are not themed. Some Windows accents and third-party controls retain their own colours. See the README for coverage. This is an early release; test in your environment before wider deployment.
+
+## Third-party notices
+
+The Windows Terminal palette data is used under the MIT licence. Download the accompanying `THIRD-PARTY-NOTICES.txt` release asset for the Microsoft copyright and full licence, plus the MinHook/HDE notices. Keep that notice with the v0.1.0 installer when redistributing it: the original MSI predates the attribution correction and does not embed this file. The original MSI and its checksum are unchanged; new installer builds include the notice.
