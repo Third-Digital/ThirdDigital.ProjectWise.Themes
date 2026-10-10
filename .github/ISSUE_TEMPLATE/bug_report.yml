@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a colour, usability, installation or stability problem.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project is a work in progress. Application testing has only covered Windows 11 Pro 26H2 (build 26300.9457) with ProjectWise Explorer CONNECT Edition 10.00.03.434 (32-bit). Compatibility with other versions is not guaranteed.
+        Please search existing issues first. Remove datasource addresses, project/document names, account details and credentials from screenshots and logs before attaching them.
+  - type: input
+    id: theme-version
+    attributes:
+      label: ProjectWise Themes version
+      placeholder: e.g. v0.1.0, or a commit SHA for a development build
+    validations:
+      required: true
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows edition, version and OS build
+      description: Run winver to find the version and build.
+      placeholder: e.g. Windows 11 Pro 26H2, build 26300.9457
+    validations:
+      required: true
+  - type: input
+    id: projectwise-version
+    attributes:
+      label: ProjectWise Explorer version and architecture
+      description: Include the full version shown in Help > About.
+      placeholder: e.g. 10.00.03.434, 32-bit
+    validations:
+      required: true
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Affected theme
+      multiple: true
+      options:
+        - Campbell
+        - Campbell Powershell
+        - Vintage
+        - One Half Dark
+        - One Half Light
+        - Solarized Dark
+        - Solarized Light
+        - Tango Dark
+        - Tango Light
+        - None (standard appearance)
+        - Installation or startup (no theme selected)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Name the affected window or tab and describe how to reach it.
+      placeholder: |
+        1. Open ...
+        2. Choose Tools > Colour Theme > ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Expected and actual behaviour
+      description: Include whether choosing None or restarting Explorer changes the result.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, logs and additional context
+      description: Optional. Attach only sanitised evidence. For crashes, include the error and whether work was lost.

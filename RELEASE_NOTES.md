@@ -1,6 +1,10 @@
 # ProjectWise Themes v0.1.0
 
+**Work in progress.** Application testing has only covered **Windows 11 Pro 26H2 (OS build 26300.9457)** with **ProjectWise Explorer CONNECT Edition 10.00.03.434 (32-bit)**. Compatibility with other Windows or ProjectWise Explorer versions is not guaranteed. Installer acceptance of other 10.00.03 builds, including .453, is not evidence of application compatibility.
+
 First release of Third Digital's colour themes for ProjectWise Explorer CONNECT Edition 10.00.03 (32-bit).
+
+The presets are inspired by Windows Terminal colour schemes. A custom theme editor is planned for a future release; it is not included in v0.1.0.
 
 - Nine colour schemes, plus None to restore the standard appearance.
 - Live switching from Tools > Colour Theme, with per-user preferences.

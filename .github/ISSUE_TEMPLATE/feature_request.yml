@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a theme improvement or another surface to support.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the affected workflow or window. Remove private datasource and document details.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behaviour
+      description: Include alternatives you have considered, if relevant.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows and ProjectWise versions
+      description: Include full versions when the request concerns a particular control or integration.
