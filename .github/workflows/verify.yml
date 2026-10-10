@@ -6,13 +6,28 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
+  repository-checks:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Validate repository files
+        shell: pwsh
+        run: ./build/Check-Repository.ps1
   unit-and-harness-build:
     runs-on: windows-2022
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
+          persist-credentials: false
       - name: Run unit tests without the proprietary SDK
         shell: pwsh
         run: ./ThirdDigital.ProjectWise.Themes.Harness/Verify.ps1 -Suite Unit -Configuration Release -ResultsRoot "$env:RUNNER_TEMP/verification"
