@@ -40,7 +40,13 @@ The build stops with an error naming `PWSDKDir` if the SDK cannot be found.
 
 ## Installing
 
-Copy the DLL to a folder of your choice, adjust the `Library` value below to match, and import the file as an administrator:
+Download the x86 MSI from [Releases](https://github.com/Third-Digital/ThirdDigital.ProjectWise.Themes/releases), close ProjectWise Explorer and run the installer as an administrator. Reopen Explorer and choose **Tools > Colour Theme**.
+
+Requires the [Microsoft Visual C++ v14 Redistributable (x86)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist), version 14.44.35207 or newer. The installer checks both this runtime and the supported ProjectWise version. The v0.1.0 installer is unsigned.
+
+The installer puts the module under `Program Files (x86)\Third Digital\ProjectWise Themes` and registers it with ProjectWise. Theme preferences are stored per user. It does not modify Bentley's application files.
+
+For manual development installation, copy the DLL to a folder of your choice, adjust the `Library` value below to match, and import the file as an administrator:
 
 ```reg
 Windows Registry Editor Version 5.00
@@ -72,7 +78,9 @@ The change applies straight away to the open windows. The choice is saved per us
 
 ## Uninstalling
 
-Close ProjectWise Explorer, delete the `CustomModules\ThirdDigital.ProjectWise.Themes` key shown above, and restart Explorer. Once loaded, the module stays in memory until Explorer exits.
+Close ProjectWise Explorer, then uninstall **Third Digital ProjectWise Themes** from Windows Installed apps. Repair is also available by running the MSI again. Saved theme preferences remain in your user profile.
+
+For a manual installation, delete the `CustomModules\ThirdDigital.ProjectWise.Themes` key shown above and remove the DLL after Explorer exits. If the MSI replaced a manual registration, uninstall removes that registration; it does not restore the old development path.
 
 ## Coverage
 
@@ -95,6 +103,10 @@ The module changes colours only, and only inside ProjectWise Explorer's own proc
 ## Third-party software
 
 This module includes [MinHook](https://github.com/TsudaKageyu/minhook) v1.3.4, built from source as the `external/minhook` submodule, under the BSD 2-Clause licence. See [external/minhook/LICENSE.txt](external/minhook/LICENSE.txt) for the complete notice, including the Hacker Disassembler Engine notices.
+
+## Installer and releases
+
+The WiX installer project is in `ThirdDigital.ProjectWise.Themes.Install`. Run `build/Build-Release.ps1` to verify and package a release. See [RELEASING.md](RELEASING.md) for build, validation and publishing instructions.
 
 ## Licence
 

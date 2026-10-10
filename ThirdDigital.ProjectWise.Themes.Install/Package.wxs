@@ -1,0 +1,78 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="Third Digital ProjectWise Themes" Manufacturer="Third Digital LLP"
+           Version="$(var.ThemesVersion)" UpgradeCode="D1E28A3C-4E02-4C8A-BADB-0A5F17163559"
+           Language="1033" Scope="perMachine" InstallerVersion="500" Compressed="yes">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of ProjectWise Themes is already installed."
+                  Schedule="afterInstallInitialize" />
+    <MediaTemplate EmbedCab="yes" />
+    <Icon Id="ProductIcon" SourceFile="Branding/third-digital.ico" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://www.third-digital.com/" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/Third-Digital/ThirdDigital.ProjectWise.Themes/issues" />
+
+    <Property Id="PWROOT">
+      <RegistrySearch Id="FindProjectWise" Root="HKLM" Key="SOFTWARE\Bentley\ProjectWise"
+                      Name="Path" Type="directory" Bitness="always32">
+        <DirectorySearch Id="FindPwBin" Path="bin">
+          <FileSearch Id="FindPwExplorer" Name="pwc.exe" MinVersion="10.0.3.0" MaxVersion="10.0.3.65535" />
+        </DirectorySearch>
+      </RegistrySearch>
+    </Property>
+    <Property Id="VCRUNTIME">
+      <DirectorySearch Id="FindVcRuntimeFolder" Path="[SystemFolder]" Depth="0">
+        <FileSearch Id="FindVcRuntimeFile" Name="vcruntime140.dll" MinVersion="14.44.35207.0" />
+      </DirectorySearch>
+    </Property>
+    <Property Id="VCCPPRUNTIME">
+      <DirectorySearch Id="FindVcCppFolder" Path="[SystemFolder]" Depth="0">
+        <FileSearch Id="FindVcCppFile" Name="msvcp140.dll" MinVersion="14.44.35207.0" />
+      </DirectorySearch>
+    </Property>
+    <Launch Condition="Installed OR PWROOT"
+            Message="Install ProjectWise Explorer CONNECT Edition 10.00.03 (32-bit) before installing ProjectWise Themes." />
+    <Launch Condition="Installed OR (VCRUNTIME AND VCCPPRUNTIME)"
+            Message="Install Microsoft Visual C++ v14 Redistributable (x86), version 14.44 or newer, then run this installer again. Download: https://aka.ms/vc14/vc_redist.x86.exe" />
+
+    <!-- Prompt to close Explorer without terminating it or discarding work. -->
+    <util:CloseApplication Id="CloseExplorer" Target="pwc.exe" Description="Please close ProjectWise Explorer to continue installing ProjectWise Themes."
+                           PromptToContinue="yes" CloseMessage="no" ElevatedCloseMessage="no" RebootPrompt="no" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUIBannerBmp" Value="Branding/banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="Branding/dialog.bmp" />
+    <WixVariable Id="WixUILicenseRtf" Value="Branding/licence.rtf" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Open ProjectWise Explorer and choose Tools > Colour Theme to get started." />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="ThirdDigitalFolder" Name="Third Digital">
+        <Directory Id="INSTALLFOLDER" Name="ProjectWise Themes">
+          <Component Id="Module" Guid="A1E573E1-7630-476E-98D6-A8D889427FBD" Bitness="always32">
+            <File Id="ThemesDll" Source="$(var.ModulePath)" KeyPath="yes" />
+            <RegistryKey Root="HKLM" Key="SOFTWARE\Bentley\ProjectWise\10.00\CustomModules\ThirdDigital.ProjectWise.Themes">
+              <RegistryValue Name="Library" Type="string" Value="[#ThemesDll]" />
+              <RegistryValue Name="Function" Type="string" Value="CustomInitialize" />
+              <RegistryValue Name="Application Mask" Type="integer" Value="1" />
+            </RegistryKey>
+          </Component>
+          <Component Id="Licence" Guid="A8FF877E-2940-43F8-9B61-7C5B647B7591">
+            <File Source="../LICENSE" Name="LICENSE.txt" KeyPath="yes" />
+          </Component>
+          <Component Id="MinHookLicence" Guid="301C25EB-F4B7-407D-A7C9-9D37735378BF">
+            <File Source="../external/minhook/LICENSE.txt" Name="MinHook-LICENSE.txt" KeyPath="yes" />
+          </Component>
+          <Component Id="Readme" Guid="E59BE89A-1D4B-4B7A-B70E-8207AF81100C">
+            <File Source="../README.md" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+    <Feature Id="Themes" Title="ProjectWise Themes" Level="1">
+      <ComponentRef Id="Module" />
+      <ComponentRef Id="Licence" />
+      <ComponentRef Id="MinHookLicence" />
+      <ComponentRef Id="Readme" />
+    </Feature>
+  </Package>
+</Wix>

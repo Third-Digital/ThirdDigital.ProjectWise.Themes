@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)Version.props" />
   <PropertyGroup>
     <PWSDKDir Condition="'$(PWSDKDir)' == ''"></PWSDKDir>
   </PropertyGroup>
