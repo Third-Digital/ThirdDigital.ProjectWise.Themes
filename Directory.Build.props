@@ -1,16 +1,17 @@
 <Project>
   <PropertyGroup>
-    <PlatformToolset>v143</PlatformToolset>
-
-    <!-- Pick your standard -->
-    <LanguageStandard>stdcpp20</LanguageStandard>
-
-    <!-- Sensible defaults -->
-    <TreatWarningAsError>true</TreatWarningAsError>
-    <WarningLevel>Level4</WarningLevel>
-
-    <!-- Usually good for DLL builds -->
-    <MultiProcessorCompilation>true</MultiProcessorCompilation>
-    <ConformanceMode>true</ConformanceMode>
+    <PWSDKDir Condition="'$(PWSDKDir)' == ''"></PWSDKDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
 </Project>
