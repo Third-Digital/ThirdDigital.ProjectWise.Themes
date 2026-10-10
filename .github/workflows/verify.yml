@@ -1,0 +1,25 @@
+name: Verify source
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-and-harness-build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+      - name: Run unit tests without the proprietary SDK
+        shell: pwsh
+        run: ./ThirdDigital.ProjectWise.Themes.Harness/Verify.ps1 -Suite Unit -Configuration Release -ResultsRoot "$env:RUNNER_TEMP/verification"
+      - name: Compile native regression harnesses
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $msbuild = & $vswhere -version '[17.0,18.0)' -requires Microsoft.Component.MSBuild -find 'MSBuild/**/Bin/MSBuild.exe' | Select-Object -First 1
+          & $msbuild ThirdDigital.ProjectWise.Themes.sln -t:ThirdDigital_ProjectWise_Themes_Harness -p:Configuration=Release -p:Platform=x86 -v:minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
