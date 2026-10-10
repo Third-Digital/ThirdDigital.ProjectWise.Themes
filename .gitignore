@@ -59,13 +59,6 @@ nunit-*.xml
 [Rr]eleasePS/
 dlldata.c
 
-# MIDL generated files (FilterUsersNode)
-ThirdDigital.ProjectWise.Administrator.FilterUsersNode/src/FilterUsersNode.h
-ThirdDigital.ProjectWise.Administrator.FilterUsersNode/src/FilterUsersNode_i.c
-ThirdDigital.ProjectWise.Administrator.FilterUsersNode/src/FilterUsersNode_p.c
-ThirdDigital.ProjectWise.Administrator.FilterUsersNode/src/dlldata.c
-ThirdDigital.ProjectWise.Administrator.FilterUsersNode/src/FilterUsersNode.tlb
-
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
@@ -372,3 +365,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Private development state and release output
+.idea/
+.codex/
+.agents/
+release-output/
+*.wixpdb
