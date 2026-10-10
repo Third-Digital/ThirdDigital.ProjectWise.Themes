@@ -51,12 +51,16 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>WIN32;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_USRDLL;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)..\external\minhook\include;$(PWSDKDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>src\$(ProjectName).def</ModuleDefinitionFile>
+      <AdditionalDependencies>uxtheme.lib;comctl32.lib;dwmapi.lib;dmawin.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(PWSDKDir)\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>dmawin.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -77,11 +81,62 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ThirdDigital.ProjectWise.Themes.cpp" />
+    <ClCompile Include="src\Domain\ColourScheme.cpp" />
+    <ClCompile Include="src\Domain\SystemColourMapping.cpp" />
+    <ClCompile Include="src\Domain\ExplorerSurface.cpp" />
+    <ClCompile Include="src\Features\Persistence\ThemeSettings.cpp" />
+    <ClCompile Include="src\Shared\ActivePalette.cpp" />
+    <ClCompile Include="src\Shared\Log.cpp" />
+    <ClCompile Include="src\Features\SystemColours\SystemColourHooks.cpp" />
+    <ClCompile Include="src\Features\ControlColours\ControlSubclass.cpp" />
+    <ClCompile Include="src\Features\TitleBar\TitleBar.cpp" />
+    <ClCompile Include="src\Features\ThemeSwitch.cpp" />
+    <ClCompile Include="src\Features\ContextMenus\ContextMenus.cpp" />
+    <ClCompile Include="src\Features\MenuBar\MenuBar.cpp" />
+    <ClCompile Include="src\Features\PaintColours\PaintColours.cpp" />
+    <ClCompile Include="src\Features\DependencyColours\DependencyColours.cpp" />
+    <ClCompile Include="src\Features\HtmlReports\HtmlReports.cpp" />
+    <ClCompile Include="src\Features\StatusBar\StatusBar.cpp" />
+    <ClCompile Include="src\Features\ChildCaption\ChildCaption.cpp" />
+    <ClCompile Include="src\Shared\CaptionGlyph.cpp" />
+    <ClCompile Include="src\Features\ThemePicker\ThemeMenu.cpp" />
+    <ClCompile Include="src\Features\ThemePicker\ThemeMenuPolicy.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Domain\ColourScheme.h" />
+    <ClInclude Include="src\Domain\SystemColourMapping.h" />
+    <ClInclude Include="src\Domain\ExplorerSurface.h" />
+    <ClInclude Include="src\Features\Persistence\ThemeSettings.h" />
+    <ClInclude Include="src\Shared\ActivePalette.h" />
+    <ClInclude Include="src\Shared\Log.h" />
+    <ClInclude Include="src\Features\SystemColours\SystemColourHooks.h" />
+    <ClInclude Include="src\Features\ControlColours\ControlSubclass.h" />
+    <ClInclude Include="src\Features\TitleBar\TitleBar.h" />
+    <ClInclude Include="src\Features\ThemeSwitch.h" />
+    <ClInclude Include="src\Features\PaintColours\PaintColours.h" />
+    <ClInclude Include="src\Features\HtmlReports\HtmlReports.h" />
+    <ClInclude Include="src\Features\ContextMenus\ContextMenus.h" />
+    <ClInclude Include="src\Features\MenuBar\MenuBar.h" />
+    <ClInclude Include="src\Features\StatusBar\StatusBar.h" />
+    <ClInclude Include="src\Features\ChildCaption\ChildCaption.h" />
+    <ClInclude Include="src\Shared\CaptionGlyph.h" />
+    <ClInclude Include="src\Features\ThemePicker\ThemeMenu.h" />
+    <ClInclude Include="src\Features\ThemePicker\ThemeMenuPolicy.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdDigital.ProjectWise.Themes.def" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\external\MinHook.vcxproj">
+      <Project>{50966531-BB1E-4E3F-AACF-49FC2CFC0684}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="CheckProjectWiseSdk" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(PWSDKDir)' == ''" Text="PWSDKDir is not set. Set the PWSDKDir environment variable for the build to the root of the Bentley ProjectWise SDK 10.00.03 (the folder containing include\aawindms.h and lib\Win32\dmawin.lib)." />
+    <Error Condition="'$(PWSDKDir)' != '' and !Exists('$(PWSDKDir)\include\aawindms.h')" Text="PWSDKDir is '$(PWSDKDir)' but include\aawindms.h was not found there. Point PWSDKDir at the root of the Bentley ProjectWise SDK 10.00.03." />
+    <Error Condition="'$(PWSDKDir)' != '' and !Exists('$(PWSDKDir)\lib\Win32\dmawin.lib')" Text="PWSDKDir is '$(PWSDKDir)' but lib\Win32\dmawin.lib was not found there. Point PWSDKDir at the root of the Bentley ProjectWise SDK 10.00.03 (32-bit libraries are required)." />
+  </Target>
 </Project>
