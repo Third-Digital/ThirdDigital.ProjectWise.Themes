@@ -1,0 +1,18 @@
+<Project Sdk="WixToolset.Sdk/4.0.6">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x86</InstallerPlatform>
+    <OutputName>ThirdDigital.ProjectWise.Themes-$(ThemesVersion)-x86</OutputName>
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>ThemesVersion=$(ThemesVersion);ModulePath=$(MSBuildThisFileDirectory)..\ThirdDigital.ProjectWise.Themes\out\Win32\Release\bin\ThirdDigital.ProjectWise.Themes.dll</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.6" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.6" />
+  </ItemGroup>
+  <Target Name="CheckModule" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)..\ThirdDigital.ProjectWise.Themes\out\Win32\Release\bin\ThirdDigital.ProjectWise.Themes.dll')" Text="Build the Release Win32 module first, or use build/Build-Release.ps1." />
+  </Target>
+</Project>

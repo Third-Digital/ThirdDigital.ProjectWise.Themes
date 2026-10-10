@@ -45,6 +45,9 @@
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup>
+    <ResourceCompile>
+      <PreprocessorDefinitions>THEMES_FILE_VERSION=$(ThemesFileVersion);THEMES_VERSION=$(ThemesVersion);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -56,6 +59,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>src\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalDependencies>uxtheme.lib;comctl32.lib;dwmapi.lib;dmawin.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -125,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdDigital.ProjectWise.Themes.def" />
+    <ResourceCompile Include="src\Version.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\external\MinHook.vcxproj">
