@@ -1,0 +1,7 @@
+* text=auto
+*.ps1 text eol=crlf
+*.wxs text eol=crlf
+*.wixproj text eol=crlf
+*.png binary
+*.bmp binary
+*.ico binary
