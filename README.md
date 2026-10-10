@@ -1,10 +1,12 @@
 # ThirdDigital.ProjectWise.Themes
 
-Colour themes for Bentley ProjectWise Explorer, based on the standard Windows Terminal colour schemes.
+Terminal-inspired colour themes for Bentley ProjectWise Explorer, based on the standard Windows Terminal colour schemes.
 
 Loaded by ProjectWise Explorer as a custom module. Not affiliated with or endorsed by Bentley Systems.
 
-Supports ProjectWise Explorer CONNECT Edition 10.00.03 (32-bit).
+> **Work in progress — compatibility is not guaranteed.** Application testing has only covered **Windows 11 Pro 26H2 (OS build 26300.9457)** with **ProjectWise Explorer CONNECT Edition 10.00.03.434 (32-bit)**. Compatibility with other versions of Windows or ProjectWise Explorer is not guaranteed. The installer accepts the 10.00.03 family, including .453, but that does not mean those other builds have been tested.
+
+A **custom theme editor is planned for a future release**. The current version provides preset themes only.
 
 ## Building
 
@@ -103,6 +105,10 @@ The module changes colours only, and only inside ProjectWise Explorer's own proc
 ## Third-party software
 
 This module includes [MinHook](https://github.com/TsudaKageyu/minhook) v1.3.4, built from source as the `external/minhook` submodule, under the BSD 2-Clause licence. See [external/minhook/LICENSE.txt](external/minhook/LICENSE.txt) for the complete notice, including the Hacker Disassembler Engine notices.
+
+## Issues and contributions
+
+Found a problem or want to help? Use the [bug report or feature request forms](https://github.com/Third-Digital/ThirdDigital.ProjectWise.Themes/issues/new/choose), and read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Include exact versions and sanitised screenshots when reporting visual issues.
 
 ## Installer and releases
 
