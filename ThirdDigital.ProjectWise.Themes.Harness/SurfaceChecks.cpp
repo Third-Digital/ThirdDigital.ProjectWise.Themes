@@ -1899,6 +1899,184 @@ namespace
     }
 
 
+    constexpr wchar_t kWizardDialogProc[] = L"Harness.WizardDialogProc";
+    LRESULT CALLBACK WizardDialogColourProc(HWND window, UINT message, WPARAM w, LPARAM l)
+    {
+        const auto original = reinterpret_cast<WNDPROC>(GetPropW(window, kWizardDialogProc));
+        if (message == WM_CTLCOLORSTATIC || message == WM_CTLCOLORBTN)
+        {
+            // The live wizard returns the stock light brush outside the comctl subclass chain.
+            SetTextColor(reinterpret_cast<HDC>(w), RGB(0, 0, 0));
+            SetBkColor(reinterpret_cast<HDC>(w), RGB(255, 255, 255));
+            return reinterpret_cast<LRESULT>(OriginalGetSysColorBrush(COLOR_3DFACE));
+        }
+        if (message == WM_NCDESTROY) RemovePropW(window, kWizardDialogProc);
+        return CallWindowProcW(original, window, message, w, l);
+    }
+
+    int NativeWizardLabelsAndOptions(const CheckContext& context)
+    {
+        Recorder r(L"NativeWizardLabelsAndOptions");
+        StartTheming(); Switch(FindScheme(L"One Half Dark"));
+        HWND dialog = OpenDialog(L"Native wizard regression");
+        SetWindowPos(dialog, nullptr, 0, 0, 560, 380, SWP_NOMOVE | SWP_NOZORDER);
+        ShowWindow(GetDlgItem(dialog, 100), SW_HIDE);
+        ShowWindow(GetDlgItem(dialog, 101), SW_HIDE);
+        // Styles and IDs read from the live Document Export Wizard.
+        HWND heading = CreateChild(L"Static", dialog, SS_LEFT | WS_GROUP, 10, 10, 344, 42, L"Welcome to the Document Export Wizard");
+        HWND description = CreateChild(L"Static", dialog, SS_LEFT | WS_GROUP, 10, 160, 344, 150,
+            L"The Send to Folder option will download unmanaged local copies of the selected documents so they can be sent out for review.");
+        HWND radio = CreateChild(L"Button", dialog, BS_AUTORADIOBUTTON | BS_MULTILINE | BS_VCENTER | WS_TABSTOP, 10, 80, 336, 26,
+            L"&Send to Folder - Creates unmanaged local copy");
+        HFONT bodyFont = CreateFontW(-12, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH, L"Arial");
+        SendMessageW(description, WM_SETFONT, reinterpret_cast<WPARAM>(bodyFont), TRUE);
+        SendMessageW(radio, WM_SETFONT, reinterpret_cast<WPARAM>(bodyFont), TRUE);
+        SetWindowLongW(heading, GWL_ID, 1974);
+        SetWindowLongW(description, GWL_ID, 1975);
+        SetWindowLongW(radio, GWL_ID, 2045);
+        const auto original = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(dialog, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WizardDialogColourProc)));
+        SetPropW(dialog, kWizardDialogProc, reinterpret_cast<HANDLE>(original));
+        SendMessageW(radio, BM_SETCHECK, BST_CHECKED, 0);
+        Pump(150);
+        HDC screen = GetDC(nullptr), dc = CreateCompatibleDC(screen);
+        HBITMAP bitmap = CreateCompatibleBitmap(screen, 344, 150);
+        ReleaseDC(nullptr, screen);
+        HGDIOBJ oldBitmap = SelectObject(dc, bitmap);
+        for (const auto& scheme : Schemes())
+        {
+            Switch(&scheme); Pump(30);
+            for (HWND control : {heading, description, radio})
+            {
+                RECT rect{}; GetClientRect(control, &rect);
+                FillRect(dc, &rect, static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+                const int saved = SaveDC(dc);
+                SendMessageW(control, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+                RestoreDC(dc, saved);
+                const COLORREF background = GetPixel(dc, rect.right - 3, rect.bottom - 3);
+                r.Expect(background == Want(ActivePalette(), COLOR_3DFACE), L"%s native %d backing %06lX follows palette", scheme.name, GetDlgCtrlID(control), background);
+                int ink = 0;
+                for (int y = 0; y < 26; ++y) for (int x = 24; x < 300; ++x)
+                    ink += GetPixel(dc, x, y) == Want(ActivePalette(), COLOR_WINDOWTEXT) ? 1 : 0;
+                r.Expect(ink > 20, L"%s native %d caption uses palette text (pixels=%d)", scheme.name, GetDlgCtrlID(control), ink);
+            }
+            r.Expect(SendMessageW(description, WM_GETFONT, 0, 0) == reinterpret_cast<LRESULT>(bodyFont), L"description font preserved");
+            EnableWindow(radio, FALSE);
+            const int saved = SaveDC(dc);
+            SendMessageW(radio, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+            RestoreDC(dc, saved);
+            int disabledInk = 0;
+            for (int y = 0; y < 26; ++y) for (int x = 24; x < 300; ++x)
+                disabledInk += GetPixel(dc, x, y) == Want(ActivePalette(), COLOR_GRAYTEXT) ? 1 : 0;
+            r.Expect(disabledInk > 20, L"native disabled caption uses palette grey");
+            EnableWindow(radio, TRUE);
+        }
+        Switch(FindScheme(L"One Half Dark")); Pump(30);
+        WriteCaptureBitmap(context, L"native-wizard-dark.bmp", dialog);
+        Switch(nullptr);
+        r.Expect(SendMessageW(radio, BM_GETCHECK, 0, 0) == BST_CHECKED, L"None preserves radio selection");
+        const int saved = SaveDC(dc);
+        SendMessageW(description, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+        RestoreDC(dc, saved);
+        r.Expect(GetPixel(dc, 340, 145) == OriginalGetSysColor(COLOR_3DFACE), L"None restores native description backing");
+        WriteCaptureBitmap(context, L"native-wizard-none.bmp", dialog);
+        SelectObject(dc, oldBitmap); DeleteObject(bitmap); DeleteDC(dc); DestroyWindow(dialog);
+        DeleteObject(bodyFont);
+        return r.Result();
+    }
+
+    constexpr wchar_t kWizardOriginalProc[] = L"Harness.WizardOriginalProc";
+    constexpr UINT kWizardUnrelatedDrawing = WM_APP + 73;
+    LRESULT CALLBACK WizardControlProc(HWND window, UINT message, WPARAM w, LPARAM l)
+    {
+        const auto original = reinterpret_cast<WNDPROC>(GetPropW(window, kWizardOriginalProc));
+        if (message == WM_PRINTCLIENT || message == kWizardUnrelatedDrawing)
+        {
+            HDC dc = reinterpret_cast<HDC>(w);
+            RECT rect{}; GetClientRect(window, &rect);
+            wchar_t name[32]{}; GetClassNameW(window, name, ARRAYSIZE(name));
+            if (wcscmp(name, L"Button") == 0)
+            {
+                // Delegate native glyphs, then paint the application's fixed-colour caption.
+                CallWindowProcW(original, window, message, w, l);
+                rect.left = 24;
+            }
+            else FillRect(dc, &rect, static_cast<HBRUSH>(GetStockObject(LTGRAY_BRUSH)));
+            wchar_t text[256]{}; GetWindowTextW(window, text, ARRAYSIZE(text));
+            SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
+            SetTextColor(dc, RGB(0, 0, 0)); SetBkMode(dc, TRANSPARENT);
+            DrawTextW(dc, text, -1, &rect, DT_WORDBREAK);
+            return 0; // Bypass the comctl subclass chain for custom text/fills.
+        }
+        if (message == WM_NCDESTROY) RemovePropW(window, kWizardOriginalProc);
+        return CallWindowProcW(original, window, message, w, l);
+    }
+
+    int LegacyWizardLabelsAndOptions(const CheckContext&)
+    {
+        Recorder r(L"LegacyWizardLabelsAndOptions");
+        StartTheming(); Switch(FindScheme(L"One Half Dark"));
+        HWND dialog = OpenDialog(L"Wizard paint regression");
+        std::vector<HWND> controls;
+        for (LONG style : {SS_LEFT, SS_CENTER, SS_RIGHT, SS_SIMPLE})
+            controls.push_back(CreateChild(L"Static", dialog, style, 5, 5, 200, 70, L"Wizard heading and wrapped description over multiple lines"));
+        HWND radio = CreateChild(L"Button", dialog, BS_AUTORADIOBUTTON, 5, 80, 200, 70, L"Send to Folder");
+        controls.push_back(radio);
+        SendMessageW(radio, BM_SETCHECK, BST_CHECKED, 0);
+        for (HWND control : controls)
+        {
+            const auto original = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(control, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WizardControlProc)));
+            SetPropW(control, kWizardOriginalProc, reinterpret_cast<HANDLE>(original));
+        }
+        Pump(150); // Attach after the application's late WNDPROC replacement.
+        HDC screen = GetDC(nullptr), dc = CreateCompatibleDC(screen);
+        HBITMAP bitmap = CreateCompatibleBitmap(screen, 200, 70);
+        ReleaseDC(nullptr, screen);
+        HGDIOBJ oldBitmap = SelectObject(dc, bitmap);
+        const int saved = SaveDC(dc);
+        for (const auto& scheme : Schemes())
+        {
+            Switch(&scheme); Pump(30);
+            for (HWND control : controls)
+            {
+                SendMessageW(control, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+                r.Expect(GetPixel(dc, 190, 65) == Want(ActivePalette(), COLOR_3DFACE), L"%s wizard backing follows palette", scheme.name);
+                int ink = 0, wrappedInk = 0;
+                for (int y = 0; y < 50; ++y) for (int x = 24; x < 190; ++x)
+                    if (GetPixel(dc, x, y) == Want(ActivePalette(), COLOR_WINDOWTEXT))
+                    {
+                        ++ink;
+                        if (y > 20) ++wrappedInk;
+                    }
+                r.Expect(ink > 20, L"%s wizard caption uses palette text", scheme.name);
+                if (control != radio) r.Expect(wrappedInk > 20, L"description retains multiple lines");
+            }
+            r.Expect(SendMessageW(radio, BM_GETCHECK, 0, 0) == BST_CHECKED, L"radio selection survives theme switching");
+            EnableWindow(radio, FALSE);
+            SendMessageW(radio, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+            int disabledInk = 0;
+            for (int y = 0; y < 20; ++y) for (int x = 24; x < 190; ++x)
+                disabledInk += GetPixel(dc, x, y) == Want(ActivePalette(), COLOR_GRAYTEXT) ? 1 : 0;
+            r.Expect(disabledInk > 20, L"disabled radio caption uses disabled palette text");
+            EnableWindow(radio, TRUE);
+            RECT unrelated{0, 0, 200, 70};
+            FillRect(dc, &unrelated, static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+            SendMessageW(radio, kWizardUnrelatedDrawing, reinterpret_cast<WPARAM>(dc), 0);
+            int originalInk = 0;
+            for (int y = 0; y < 20; ++y) for (int x = 24; x < 190; ++x)
+                originalInk += GetPixel(dc, x, y) == RGB(0, 0, 0) ? 1 : 0;
+            r.Expect(originalInk > 20, L"drawing outside button paint keeps original text colour");
+        }
+        Switch(nullptr);
+        SendMessageW(controls.front(), WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT);
+        LOGBRUSH stock{}; GetObjectW(GetStockObject(LTGRAY_BRUSH), sizeof(stock), &stock);
+        r.Expect(GetPixel(dc, 190, 65) == stock.lbColor, L"None restores original wizard fill");
+        r.Expect(SendMessageW(radio, BM_GETCHECK, 0, 0) == BST_CHECKED, L"None preserves radio selection");
+        RestoreDC(dc, saved);
+        SelectObject(dc, oldBitmap); DeleteObject(bitmap); DeleteDC(dc); DestroyWindow(dialog);
+        return r.Result();
+    }
+
     CComPtr<IHTMLDocument2> NewReportDocument()
     {
         CComPtr<IHTMLDocument2> document;
@@ -2067,6 +2245,8 @@ namespace
 
     const CheckRegistration registrations[] = {
         CheckRegistration{{L"Stability", L"AuditReportUsesScreenCssAndRestoresNone", L"-", Host::Self, false, AuditReportUsesScreenCssAndRestoresNone}},
+        CheckRegistration{{L"Wizard", L"NativeWizardLabelsAndOptions", L"-", Host::Self, false, NativeWizardLabelsAndOptions}},
+        CheckRegistration{{L"Wizard", L"LegacyWizardLabelsAndOptions", L"-", Host::Self, false, LegacyWizardLabelsAndOptions}},
         CheckRegistration{{L"Stability", L"LateLegacyLabelAndNativeCheckbox", L"-", Host::Self, false, LateLegacyLabelAndNativeCheckbox}},
         CheckRegistration{{L"Stability", L"DependencyDrawingIsScopedAndReversible", L"-", Host::Self, false, DependencyDrawingIsScopedAndReversible}},
         CheckRegistration{{L"Stability", L"AccessGridFillsAndCheckStates", L"-", Host::Self, false, AccessGridFillsAndCheckStates}},
