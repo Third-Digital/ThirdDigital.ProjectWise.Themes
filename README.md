@@ -52,7 +52,7 @@ The build stops with an error naming `PWSDKDir` if the SDK cannot be found.
 
 Download the x86 MSI from [Releases](https://github.com/Third-Digital/ThirdDigital.ProjectWise.Themes/releases), close ProjectWise Explorer and run the installer as an administrator. Reopen Explorer and choose **Tools > Colour Theme**.
 
-Requires the [Microsoft Visual C++ v14 Redistributable (x86)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist), version 14.44.35207 or newer. The installer checks both this runtime and the supported ProjectWise version. The v0.1.0 installer is unsigned.
+Requires the [Microsoft Visual C++ v14 Redistributable (x86)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist), version 14.44.35207 or newer. The installer checks both this runtime and the supported ProjectWise version. The installer is unsigned.
 
 The installer puts the module under `Program Files (x86)\Third Digital\ProjectWise Themes` and registers it with ProjectWise. Theme preferences are stored per user. It does not modify Bentley's application files.
 
