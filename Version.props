@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <ThemesVersion>0.1.0</ThemesVersion>
-    <ThemesFileVersion>0,1,0,0</ThemesFileVersion>
+    <ThemesVersion>0.1.1</ThemesVersion>
+    <ThemesFileVersion>0,1,1,0</ThemesFileVersion>
   </PropertyGroup>
 </Project>
