@@ -50,6 +50,13 @@ namespace
         return t_paintDepth != 0 && !t_drawing && ColourDisplayDc(dc) ? ActivePalette() : nullptr;
     }
 
+    const PaletteResources* TextDrawingPalette(HDC dc) noexcept
+    {
+        // Native button glyph painting stays outside the general colour remapper. Its text
+        // still needs palette colours, including when comctl32 draws the caption itself.
+        return (t_paintDepth != 0 || t_buttonPaint != nullptr) && !t_drawing && ColourDisplayDc(dc) ? ActivePalette() : nullptr;
+    }
+
     COLORREF MapColour(COLORREF colour, const PaletteResources& p, bool text) noexcept
     {
         if (!text)
@@ -57,7 +64,7 @@ namespace
                 if (p.palette.At(role) == colour) return colour;
         if ((colour & 0xff000000) != 0 || GetRValue(colour) != GetGValue(colour) || GetRValue(colour) != GetBValue(colour))
             return colour; // Keep semantic/accent colours, palette indices and sentinels.
-        if (text) return *p.palette.At(COLOR_WINDOWTEXT);
+        if (text) return *p.palette.At(t_buttonPaint != nullptr && !IsWindowEnabled(t_buttonPaint) ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT);
         if (colour == RGB(255, 255, 255)) return *p.palette.At(COLOR_WINDOW);
         if (GetRValue(colour) >= 160) return *p.palette.At(COLOR_3DFACE);
         return *p.palette.At(COLOR_3DSHADOW);
@@ -145,17 +152,17 @@ namespace
     }
     int WINAPI Text(HDC dc, LPCWSTR text, int count, LPRECT rect, UINT format)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawText(dc, text, count, rect, format); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawText(dc, text, count, rect, format); }
         return g_drawText(dc, text, count, rect, format);
     }
     int WINAPI TextEx(HDC dc, LPWSTR text, int count, LPRECT rect, UINT format, LPDRAWTEXTPARAMS params)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextEx(dc, text, count, rect, format, params); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextEx(dc, text, count, rect, format, params); }
         return g_drawTextEx(dc, text, count, rect, format, params);
     }
     BOOL WINAPI PlainText(HDC dc, int x, int y, LPCWSTR text, int count)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_textOut(dc, x, y, text, count); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_textOut(dc, x, y, text, count); }
         return g_textOut(dc, x, y, text, count);
     }
     BOOL WINAPI ExtText(HDC dc, int x, int y, UINT flags, const RECT* rect, LPCWSTR text, UINT count, const INT* dx)
@@ -164,29 +171,29 @@ namespace
         // its temporary disabled-text bitmaps or normal text drawing.
         if (t_accessPaint != nullptr && !t_drawing && count == 0 && (flags & ETO_OPAQUE) != 0 && ColourDisplayDc(dc))
             if (const auto* p = ActivePalette()) { DrawingState state(dc, *p); return g_extTextOut(dc, x, y, flags, rect, text, count, dx); }
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_extTextOut(dc, x, y, flags, rect, text, count, dx); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_extTextOut(dc, x, y, flags, rect, text, count, dx); }
         return g_extTextOut(dc, x, y, flags, rect, text, count, dx);
     }
     int WINAPI AnsiText(HDC dc, LPCSTR text, int count, LPRECT rect, UINT format)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextA(dc, text, count, rect, format); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextA(dc, text, count, rect, format); }
         return g_drawTextA(dc, text, count, rect, format);
     }
     int WINAPI AnsiTextEx(HDC dc, LPSTR text, int count, LPRECT rect, UINT format, LPDRAWTEXTPARAMS params)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextExA(dc, text, count, rect, format, params); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_drawTextExA(dc, text, count, rect, format, params); }
         return g_drawTextExA(dc, text, count, rect, format, params);
     }
     BOOL WINAPI AnsiPlainText(HDC dc, int x, int y, LPCSTR text, int count)
     {
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_textOutA(dc, x, y, text, count); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_textOutA(dc, x, y, text, count); }
         return g_textOutA(dc, x, y, text, count);
     }
     BOOL WINAPI AnsiExtText(HDC dc, int x, int y, UINT flags, const RECT* rect, LPCSTR text, UINT count, const INT* dx)
     {
         if (t_accessPaint != nullptr && !t_drawing && count == 0 && (flags & ETO_OPAQUE) != 0 && ColourDisplayDc(dc))
             if (const auto* p = ActivePalette()) { DrawingState state(dc, *p); return g_extTextOutA(dc, x, y, flags, rect, text, count, dx); }
-        if (const auto* p = DrawingPalette(dc)) { DrawingState state(dc, *p); return g_extTextOutA(dc, x, y, flags, rect, text, count, dx); }
+        if (const auto* p = TextDrawingPalette(dc)) { DrawingState state(dc, *p); return g_extTextOutA(dc, x, y, flags, rect, text, count, dx); }
         return g_extTextOutA(dc, x, y, flags, rect, text, count, dx);
     }
     BOOL WINAPI Pattern(HDC dc, int x, int y, int w, int h, DWORD operation)
@@ -268,6 +275,18 @@ namespace
         return PaintButtonBackground(window, dc, rect) ? S_OK : g_parentBackgroundEx(window, dc, flags, rect);
     }
 
+    bool IsWizardDescription(HWND window) noexcept
+    {
+        // Document Export Wizard's heading/description IDs, observed on its native dialog page.
+        // Limit the explicit wrapped renderer to this pair; other application labels may have
+        // their own coloured backgrounds or custom layout.
+        const int id = GetDlgCtrlID(window);
+        if (id != 1974 && id != 1975) return false;
+        HWND sibling = GetDlgItem(GetParent(window), id == 1974 ? 1975 : 1974);
+        wchar_t name[32]{};
+        return sibling != nullptr && GetClassNameW(sibling, name, ARRAYSIZE(name)) != 0 && _wcsicmp(name, L"Static") == 0;
+    }
+
     bool PaintPlainLabel(HWND window, UINT message, WPARAM w, LPARAM l)
     {
         const auto* p = ActivePalette();
@@ -278,9 +297,12 @@ namespace
         GetClassNameW(window, name, ARRAYSIZE(name));
         GetClassNameW(GetParent(window), parentClass, ARRAYSIZE(parentClass));
         const LONG style = GetWindowLongW(window, GWL_STYLE);
-        if (_wcsicmp(name, L"Static") != 0 || (style & SS_TYPEMASK) != SS_LEFTNOWORDWRAP || wcscmp(parentClass, L"#32770") != 0) return false;
+        if (_wcsicmp(name, L"Static") != 0 || wcscmp(parentClass, L"#32770") != 0) return false;
+        const bool wrapped = (style & SS_TYPEMASK) == SS_LEFT && IsWizardDescription(window);
+        if (!wrapped && (style & SS_TYPEMASK) != SS_LEFTNOWORDWRAP) return false;
         // Bentley's attribute labels bypass standard control-colour handling. Preserve their text,
-        // font, bounds and single-line layout while drawing the two palette colours explicitly.
+        // font and bounds while drawing the two palette colours explicitly. Wizard descriptions
+        // also need a full fill: their stock backing is not confined to the text's opaque rectangle.
         wchar_t text[1024]{};
         if (GetWindowTextLengthW(window) >= static_cast<int>(ARRAYSIZE(text))) return false;
         GetWindowTextW(window, text, ARRAYSIZE(text));
@@ -295,7 +317,7 @@ namespace
         if (font != nullptr) SelectObject(dc, font);
         SetBkMode(dc, TRANSPARENT);
         SetTextColor(dc, *p->palette.At(IsWindowEnabled(window) ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
-        UINT flags = DT_LEFT | DT_SINGLELINE | DT_EXPANDTABS;
+        UINT flags = DT_LEFT | DT_EXPANDTABS | (wrapped ? DT_WORDBREAK : DT_SINGLELINE);
         if ((style & SS_NOPREFIX) != 0) flags |= DT_NOPREFIX;
         if ((style & SS_CENTERIMAGE) != 0) flags |= DT_VCENTER;
         g_drawText(dc, text, -1, &rect, flags);
@@ -316,8 +338,13 @@ namespace
         if (PaintPlainLabel(window, message, w, l)) return 0;
         const unsigned previousDepth = t_paintDepth;
         const HWND previousButton = t_buttonPaint;
-        if ((GetWindowLongW(window, GWL_STYLE) & BS_TYPEMASK) == BS_OWNERDRAW) t_buttonPaint = window;
-        if (message == WM_PAINT || message == WM_PRINT || message == WM_PRINTCLIENT || message == WM_ERASEBKGND) ++t_paintDepth;
+        if (message == WM_PAINT || message == WM_PRINT || message == WM_PRINTCLIENT || message == WM_ERASEBKGND)
+        {
+            wchar_t name[32]{};
+            GetClassNameW(window, name, ARRAYSIZE(name));
+            if (_wcsicmp(name, L"Button") == 0) t_buttonPaint = window;
+            ++t_paintDepth;
+        }
         __try { return original != nullptr ? CallWindowProcW(original, window, message, w, l) : DefWindowProcW(window, message, w, l); }
         __finally { t_paintDepth = previousDepth; t_buttonPaint = previousButton; }
     }
@@ -328,10 +355,18 @@ namespace
         GetClassNameW(window, name, ARRAYSIZE(name));
         GetClassNameW(GetParent(window), parentClass, ARRAYSIZE(parentClass));
         const LONG style = GetWindowLongW(window, GWL_STYLE);
-        const bool label = _wcsicmp(name, L"Static") == 0 && (style & SS_TYPEMASK) == SS_LEFTNOWORDWRAP;
-        const bool button = _wcsicmp(name, L"Button") == 0 && (style & BS_TYPEMASK) == BS_OWNERDRAW;
+        const LONG staticType = style & SS_TYPEMASK;
+        const bool label = _wcsicmp(name, L"Static") == 0 &&
+            (staticType == SS_LEFT || staticType == SS_CENTER || staticType == SS_RIGHT || staticType == SS_LEFTNOWORDWRAP || staticType == SS_SIMPLE);
+        const LONG buttonType = style & BS_TYPEMASK;
+        const bool button = _wcsicmp(name, L"Button") == 0 &&
+            (buttonType == BS_OWNERDRAW || buttonType == BS_RADIOBUTTON || buttonType == BS_AUTORADIOBUTTON ||
+             buttonType == BS_CHECKBOX || buttonType == BS_AUTOCHECKBOX || buttonType == BS_3STATE || buttonType == BS_AUTO3STATE);
         if ((!label && !button) || wcscmp(parentClass, L"#32770") != 0 || GetPropW(window, kLegacyProcedure) != nullptr) return;
         // Bentley's legacy WNDPROC can consume paint without forwarding to the comctl subclass chain.
+        // Cover wrapped headings, descriptions and option captions as well as attribute labels.
+        // Keep their original layout and glyphs, with colour remapping around custom drawing.
+        // Bitmap/icon statics are deliberately excluded.
         // Attach outside it only after initialization, and delegate all non-paint messages unchanged.
         const auto original = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(window, GWLP_WNDPROC));
         if (original != nullptr && SetPropW(window, kLegacyProcedure, reinterpret_cast<HANDLE>(original)))
